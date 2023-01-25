@@ -129,6 +129,10 @@ struct rtentry;		/* declarations in <net/if.h> */
 #include "pcap-airpcap.h"
 #endif
 
+#ifdef PCAP_SUPPORT_ESP32
+#include "pcap-esp32-wifi.h"
+#endif
+
 #ifdef _WIN32
 /*
  * To quote the WSAStartup() documentation:
@@ -488,6 +492,22 @@ pcap_get_airpcap_handle_not_initialized(pcap_t *pcap)
 }
 #endif
 
+#ifdef PCAP_SUPPORT_ESP32
+static int
+pcap_set_channel_not_initialized(pcap_t *pcap, uint8_t channel _U_)
+{
+	pcap_set_not_initialized_message(pcap);
+	return (PCAP_ERROR_NOT_ACTIVATED);
+}
+
+static int
+pcap_get_channel_not_initialized(pcap_t *pcap, uint8_t *channel _U_)
+{
+	pcap_set_not_initialized_message(pcap);
+	return (PCAP_ERROR_NOT_ACTIVATED);
+}
+#endif /* PCAP_SUPPORT_ESP32 */
+
 /*
  * Returns 1 if rfmon mode can be set on the pcap_t, 0 if it can't,
  * a PCAP_ERROR value on an error.
@@ -697,6 +717,9 @@ static struct capture_source_type {
 #endif
 #ifdef HAVE_AIRPCAP_API
 	{ airpcap_findalldevs, airpcap_create },
+#endif
+#ifdef PCAP_SUPPORT_ESP32
+	{ esp32_wifi_findalldevs, esp32_wifi_create },
 #endif
 	{ NULL, NULL }
 };
@@ -1603,11 +1626,18 @@ pcap_lookupnet(const char *device, bpf_u_int32 *netp, bpf_u_int32 *maskp,
 #ifdef PCAP_SUPPORT_DPDK
 	    || strncmp(device, "dpdk:", 5) == 0
 #endif
+#ifdef PCAP_SUPPORT_ESP32
+	    || strstr(device, "esp32-wlan") != NULL
+#endif
 	    ) {
 		*netp = *maskp = 0;
 		return 0;
 	}
 
+#if defined(PCAP_SUPPORT_ESP32)
+        /* the esp32/freertos socket api is not compatable with GNU/Linux */
+        /* do nothing */
+#else
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd < 0) {
 		pcap_fmt_errmsg_for_errno(errbuf, PCAP_ERRBUF_SIZE,
@@ -1661,6 +1691,7 @@ pcap_lookupnet(const char *device, bpf_u_int32 *netp, bpf_u_int32 *maskp,
 		}
 	}
 	*netp &= *maskp;
+#endif /* defined(PCAP_SUPPORT_ESP32) */
 	return (0);
 }
 #endif /* !defined(_WIN32) && !defined(MSDOS) */
@@ -2418,6 +2449,11 @@ initialize_ops(pcap_t *p)
 	p->live_dump_ended_op = pcap_live_dump_ended_not_initialized;
 	p->get_airpcap_handle_op = pcap_get_airpcap_handle_not_initialized;
 #endif
+
+#ifdef PCAP_SUPPORT_ESP32
+        p->get_channel_op = pcap_get_channel_not_initialized;
+        p->set_channel_op = pcap_set_channel_not_initialized;
+#endif /* PCAP_SUPPORT_ESP32 */
 
 	/*
 	 * Default cleanup operation - implementations can override

@@ -1,3 +1,37 @@
+# ESP32-FreeRTOS port of LIBPCAP
+
+This is an experimental port of libpcap to the ESP32 MCU.  I don't
+anticipate this ever rolling back into the official maintainers, as
+there will be a lot of platform-specific changes.
+
+## Build
+
+To build, run
+
+```bash
+./build-esp32.sh
+```
+
+This will invoke the GNU autotools configure script to cross compile.
+
+## Limitations
+
+Although this compiles into a library, it has not been extensively
+tested.  You've been warned!  Pull requests are welcome.
+
+## Roadmap
+
+Here are my plans.  Pull requests are welcome!
+
+- [x] Get a clean compile using the null device type.
+- [ ] Modify pcap code to support ESP32/FreeRTOS file IO.
+- [ ] Test pcap file formats
+- [x] Write ESP32-specific WiFi interface code (like pcap-null.c or pcap-sita.c as guides)
+- [ ] Test network sniffing on ESP32 platform.
+- [ ] Write ESP32-specific bluetooth interface code (like pcap-null.c or pcap-sita.c as guides)
+- [ ] Test bluetooth sniffing on ESP32 platform.
+- [ ] Not related to this project, but port libtins to the ESP32 platform for packet dissection/construction on the target
+
 # LIBPCAP 1.x.y by [The Tcpdump Group](https://www.tcpdump.org)
 
 **To report a security issue please send an e-mail to security@tcpdump.org.**

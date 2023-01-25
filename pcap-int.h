@@ -214,6 +214,10 @@ typedef int	(*live_dump_op_t)(pcap_t *, char *, int, int);
 typedef int	(*live_dump_ended_op_t)(pcap_t *, int);
 typedef PAirpcapHandle	(*get_airpcap_handle_op_t)(pcap_t *);
 #endif
+#ifdef PCAP_SUPPORT_ESP32
+typedef int	(*set_channel_op_t)(pcap_t *, uint8_t);
+typedef int	(*get_channel_op_t)(pcap_t *, uint8_t *);
+#endif /* PCAP_SUPPORT_ESP32 */
 typedef void	(*cleanup_op_t)(pcap_t *);
 
 /*
@@ -366,6 +370,12 @@ struct pcap {
 	live_dump_ended_op_t live_dump_ended_op;
 	get_airpcap_handle_op_t get_airpcap_handle_op;
 #endif
+
+#ifdef PCAP_SUPPORT_ESP32
+	set_channel_op_t set_channel_op;
+	get_channel_op_t get_channel_op;
+#endif /* PCAP_SUPPORT_ESP32 */
+
 	cleanup_op_t cleanup_op;
 };
 

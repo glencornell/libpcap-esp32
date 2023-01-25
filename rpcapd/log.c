@@ -30,7 +30,25 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
+#ifdef PCAP_SUPPORT_ESP32
+#include <esp_log.h>
+static const char *TAG = "rpcapd";
+/* emulate syslog with esp_log */
+#define LOG_PID 0
+#define LOG_DAEMON 0
+static void openlog(const char *ident, int option, int facility) {
+  TAG = ident;
+}
+#define LOG_DEBUG   ESP_LOG_DEBUG
+#define LOG_INFO    ESP_LOG_INFO
+#define LOG_WARNING ESP_LOG_WARN
+#define LOG_ERR     ESP_LOG_ERROR
+static void syslog(int priority, const char *format, const char *msg) {
+  esp_log_write(priority, TAG, format, msg);
+}
+#else
 #include <syslog.h>
+#endif /* PCAP_SUPPORT_ESP32 */
 #endif
 
 #include "portability.h"

@@ -217,7 +217,7 @@ pcap_nametoaddrinfo(const char *name)
  *  XXX - not guaranteed to be thread-safe!  See below for platforms
  *  on which it is thread-safe and on which it isn't.
  */
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(PCAP_SUPPORT_ESP32)
 bpf_u_int32
 pcap_nametonetaddr(const char *name _U_)
 {
@@ -508,6 +508,13 @@ pcap_nametoportrange(const char *name, int *port1, int *port2, int *proto)
 	return 1;
 }
 
+#if defined(PCAP_SUPPORT_ESP32)
+int
+pcap_nametoproto(const char *str)
+{
+		return PROTO_UNDEF;
+}
+#else
 /*
  * XXX - not guaranteed to be thread-safe!  See below for platforms
  * on which it is thread-safe and on which it isn't.
@@ -569,6 +576,7 @@ pcap_nametoproto(const char *str)
 	else
 		return PROTO_UNDEF;
 }
+#endif /* PCAP_SUPPORT_ESP32 */
 
 #include "ethertype.h"
 

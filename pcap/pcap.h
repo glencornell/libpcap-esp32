@@ -888,6 +888,15 @@ PCAP_API const char *pcap_lib_version(void);
   PCAP_API void pcap_set_wait (pcap_t *p, void (*yield)(void), int wait);
   PCAP_API u_long pcap_mac_packets (void);
 
+#elif defined(PCAP_SUPPORT_ESP32)
+
+  /*
+   * ESP32 definitions
+   */
+
+  PCAP_API int  pcap_set_channel (pcap_t *, uint8_t);
+  PCAP_API int  pcap_get_channel (pcap_t *, uint8_t *);
+
 #else /* UN*X */
 
   /*

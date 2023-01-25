@@ -152,6 +152,15 @@ extern int pcap_vasprintf(char **, const char *, va_list ap);
   #endif
 #endif /* HAVE_STRTOK_R */
 
+#ifdef HAVE_CRYPT
+  #define pcap_crypt	crypt
+#else
+    /*
+     * Define it ourselves.
+     */
+    extern char *pcap_crypt(const char *, const char *);
+#endif /* HAVE_CRYPT */
+
 #ifdef _WIN32
   #if !defined(__cplusplus)
     #define inline __inline

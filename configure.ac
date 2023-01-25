@@ -198,9 +198,19 @@ haiku*)
 	;;
 esac
 
+AS_CASE([$build],
+        [xtensa-esp32-*],
+        [
+        V_PCAP=esp32
+	AC_DEFINE(PCAP_SUPPORT_ESP32, 1, [target is ESP32])
+	AC_SUBST(PCAP_SUPPORT_ESP32)
+        ],
+        [
+# default
 AC_LBL_SAVE_CHECK_STATE
 AC_LBL_FIXINCLUDES
 AC_LBL_RESTORE_CHECK_STATE
+        ])
 
 AC_CHECK_FUNCS(strerror)
 AC_CHECK_FUNC(strerror_r,
@@ -311,7 +321,16 @@ fi
 # Do this before checking for ether_hostton(), as it's a
 # "getaddrinfo()-ish function".
 #
+AS_CASE([$build],
+        [xtensa-esp32-*],
+        [
+# do nothing for esp32 target builds
+# TODO: figure out what we really need to do here
+        ],
+        [
+# default
 AC_LBL_LIBRARY_NET
+        ])
 
 #
 # Check for reentrant versions of getnetbyname_r(), as provided by
@@ -1202,6 +1221,13 @@ snf)
 	xxx_only=yes
 	;;
 
+esp32)
+	#
+	# Capture module
+	#
+	PLATFORM_C_SRC="pcap-esp32-wifi.c"
+	;;
+
 null)
 	#
 	# Capture module
@@ -1219,8 +1245,17 @@ dnl Now figure out how we get a list of interfaces and addresses,
 dnl if we support capturing.  Don't bother if we don't support
 dnl capturing.
 dnl
-if test "$V_PCAP" != null
-then
+AS_CASE([$V_PCAP],
+[null],
+[
+	# Do nothing - the null device doesn't support live capture
+],
+[esp32],
+[
+        # TODO: figure out how to support getifaddrs() on ESP32. This
+        # may be useful to support wifi and bluetooth devices.
+],
+[
 	AC_CHECK_FUNC(getifaddrs,[
 		#
 		# We have "getifaddrs()"; make sure we have <ifaddrs.h>
@@ -1280,7 +1315,7 @@ then
 			PLATFORM_C_SRC="$PLATFORM_C_SRC fad-gifc.c"
 		fi
 	])
-fi
+])
 
 dnl check for hardware timestamp support
 case "$host_os" in
@@ -1725,6 +1760,37 @@ if test "$want_turbocap" != no; then
 		fi
 	fi
 fi
+
+AC_ARG_WITH(esp32,
+AS_HELP_STRING([--with-esp32@<:@=DIR@:>@],[include ESP32 support (located in directory DIR, if supplied).  @<:@default=yes, if present@:>@]),
+[
+	if test "$withval" = no
+	then
+		want_esp32=no
+	elif test "$withval" = yes
+	then
+		want_esp32=yes
+		esp32_root=
+	else
+		want_esp32=yes
+		esp32_root=$withval
+	fi
+],[
+	if test "$V_PCAP" = esp32; then
+		# User requested Esp32-only libpcap, so we'd better have
+		# the Esp32 API.
+		want_esp32=yes
+	elif test "xxx_only" = yes; then
+		# User requested something-else-only pcap, so they don't
+		# want Esp32 support.
+		want_esp32=no
+	else
+		#
+		# Use Esp32 API if present, otherwise don't
+		#
+		want_esp32=ifpresent
+	fi
+])
 
 dnl
 dnl Allow the user to enable remote capture.
