@@ -1879,6 +1879,18 @@ yes)	AC_MSG_RESULT(yes)
 		openssl_pkgconfig_dir=`$BREW --env --plain openssl | sed -n 's/PKG_CONFIG_PATH: //p'`
 		PKG_CONFIG_PATH="$openssl_pkgconfig_dir:$PKG_CONFIG_PATH"
 	fi
+AS_CASE([$build],
+        [xtensa-esp32-*],
+        [
+# esp32 target builds
+			HAVE_OPENSSL=yes
+			OPENSSL_CFLAGS=
+			OPENSSL_LIBS="-lopenssl"
+			OPENSSL_LIBS_STATIC="-lopenssl"
+			OPENSSL_LIBS_PRIVATE="-lopenssl"
+        ],
+        [
+# default
 	PKG_CHECK_MODULE(OPENSSL, openssl,
 	    [
 		#
@@ -1888,6 +1900,7 @@ yes)	AC_MSG_RESULT(yes)
 		REQUIRES_PRIVATE="$REQUIRES_PRIVATE openssl"
 	    ])
 	PKG_CONFIG_PATH="$save_PKG_CONFIG_PATH"
+        ])
 
 	#
 	# If it wasn't found, and we have Homebrew installed, see
