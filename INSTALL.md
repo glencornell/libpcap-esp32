@@ -4,16 +4,28 @@ with CMake and any build system supported by CMake.
 
 To build libpcap with the configure script and `make`:
 
+* If you build from a git clone rather than from a release archive,
+run `./autogen.sh` (a shell script). The autogen.sh script will
+build the `configure` and `config.h.in` files.
+
+On some system, you may need to set the `AUTORECONF` variable, like:
+`AUTORECONF=autoreconf-2.69 ./autogen.sh`
+to select the `autoreconf` version you want to use.
+
 * Run `./configure` (a shell script).  The configure script will
 determine your system attributes and generate an appropriate `Makefile`
 from `Makefile.in`.  The configure script has a number of options to
-control the configuration of libpcap; `./configure --help`` will show
+control the configuration of libpcap; `./configure --help` will show
 them.
 
 * Next, run `make`.  If everything goes well, you can
 `su` to root and run `make install`.  However, you need not install
 libpcap if you just want to build tcpdump; just make sure the tcpdump
 and libpcap directory trees have the same parent directory.
+
+On OpenBSD, you may need to set, before the `make`, the `AUTOCONF_VERSION`
+variable like:
+`AUTOCONF_VERSION=2.69 make`
 
 To build libpcap with CMake and the build system of your choice, from
 the command line:
@@ -62,7 +74,7 @@ forget to include an autoconf fragment suitable for use in
 `configure.ac`.
 
 It is possible to override the default packet capture type with the
-`--with-pcap`` option to `./configure` or the `-DPCAP_TYPE` option to
+`--with-pcap` option to `./configure` or the `-DPCAP_TYPE` option to
 CMake, although the circumstances where this works are limited.  One
 possible reason to do that would be to force a supported packet capture
 type in the case where the configure or CMake scripts fails to detect
@@ -202,13 +214,12 @@ in `/usr/include/sys/dlpi.h`, and find the corresponding value.
 	aclocal.m4	    - autoconf macros
 	arcnet.h	    - ARCNET definitions
 	atmuni31.h	    - ATM Q.2931 definitions
+	autogen.sh	    - build configure and config.h.in (run this first)
 	bpf_dump.c	    - BPF program printing routines
 	bpf_filter.c	    - BPF filtering routines
 	bpf_image.c	    - BPF disassembly routine
 	config.guess	    - autoconf support
-	config.h.in	    - autoconf input
 	config.sub	    - autoconf support
-	configure	    - configure script (run this first)
 	configure.ac	    - configure script source
 	dlpisubs.c	    - DLPI-related functions for pcap-dlpi.c and pcap-libdlpi.c
 	dlpisubs.h	    - DLPI-related function declarations
